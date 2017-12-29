@@ -31,3 +31,10 @@ def Pick_Step1_task(novel_id):
     paragraphs = paragraphs.exclude(paragraph_id = paragraphs.count()-1)
     #return paragraphs.order_by('?')[0].paragraph_id
     return 153
+
+
+def temporary_for_data_exploration():
+    novel = Novel.objects.get(title='Hardfeelings')
+    paragraph = Paragraph.objects.get(novel=novel, paragraph_id = 153)
+    task_a = Step1_Task_A.objects.filter(novel=novel, refer_paragraph = paragraph)
+    print(task_a.filter(is_separate=True).count())

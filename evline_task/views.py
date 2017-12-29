@@ -3,12 +3,13 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from .models import Novel, Summary_Sentence, Paragraph, Step1_Task_A, Step1_Task_B, Feedback_Step1
-from .database_manage import Novel_Data_Gen, Pick_Step1_task
+from .database_manage import Novel_Data_Gen, Pick_Step1_task, temporary_for_data_exploration
 from .forms import Step1Form, Feedback1Form
 import json
 # Create your views here.
 
 def step1(request, novel_id):
+    temporary_for_data_exploration()
     novel = Novel.objects.get(title = novel_id)
     if request.method=='POST':
         step1form = Step1Form(request.POST)
@@ -28,7 +29,7 @@ def step1(request, novel_id):
     #Novel_Data_Gen(novel_id)
     paragraph_id = Pick_Step1_task(novel_id)
     total_paragraphs = list(Paragraph.objects.filter(novel=novel).values('paragraph_string'))
-    print(total_paragraphs)
+    #print(total_paragraphs)
     paragraphs = Paragraph.objects.filter(novel = novel, paragraph_id__in = range(paragraph_id-4,  paragraph_id+6))
     summary_sentences = Summary_Sentence.objects.filter(novel=novel)
     texts = {
