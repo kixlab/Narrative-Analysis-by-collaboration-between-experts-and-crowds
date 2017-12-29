@@ -37,4 +37,4 @@ def temporary_for_data_exploration():
     novel = Novel.objects.get(title='Hardfeelings')
     paragraph = Paragraph.objects.get(novel=novel, paragraph_id = 153)
     task_a = Step1_Task_A.objects.filter(novel=novel, refer_paragraph = paragraph)
-    print(task_a.filter(is_separate=True).count())
+    return (task_a.filter(is_separate=True).count())
