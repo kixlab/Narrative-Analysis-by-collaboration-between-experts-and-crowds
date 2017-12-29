@@ -1,0 +1,64 @@
+{% extends 'evline_task/base.html' %}
+{% load evline_extras %}
+<!--title-->
+{% block task_title %}
+<div id="task_title_text" style="display:inline">Decide whether there is a temporal leap in between two paragraphs in darker colors</div>
+<button id='tuto_show' class='btn btn-secondary' style='float: right'>Tutorial</button>
+{% endblock %}
+
+<!--summary-->
+{% block summary %}
+  {% for summary_sentence in summary_sentences %}
+    <a id={{summary_sentence.summary_id}} class="sum_sen disabled" href="#">{{summary_sentence.sentence_string}}</a>
+  {% endfor %}
+{% endblock %}
+<!--original text-->
+{% block original_text %}
+<button id='see_previous' class='btn btn-secondary' style="width:100%; margin-bottom:10px">See the previous part</button>
+<div id="text_content">
+  {% for paragraph in paragraphs %}
+    {% if paragraph.paragraph_id == center_paragraph_id %}
+    <p id="paragraph_A" style="color: black; background-color: #cedaed" data-toggle="tooltip" title="A" data-placement='right'>
+    {% elif paragraph.paragraph_id == next_paragraph_id %}
+    <p id="paragraph_B" style="color: black; background-color: #ceede6" data-toggle="tooltip" title="B" data-placement='right'>
+    {% else %}
+    <p style="color: grey">
+    {% endif %}
+    {{paragraph.paragraph_string}}</p>
+  {% endfor %}
+</div>
+<button id='see_next' class='btn btn-secondary' style="width:100%; margin-bottom:10px">See the next part</button>
+<script>
+  var total_paragraphs ={{total_paragraphs|safe}}
+  var beginning_id = Math.max({{center_paragraph_id}}-4, 0);
+  var ending_id = Math.min({{center_paragraph_id}}+5, total_paragraphs.length-1);
+</script>
+{% endblock %}
+<!--for submission buttons-->
+{% block submit %}
+{% load static %}
+<div style="float:right; display:inline">
+<button id='yes_prev' class='btn btn-success btn-sm'>There is temporal leap</button>
+<button id='no_next' class='btn btn-danger btn-sm'>There is no temporal leap</button>
+</div>
+<script type="text/javascript" src="{% static 'js/step1.js' %}" /></script>
+<script>$('[data-toggle="tooltip"]').tooltip("show").tooltip({
+  container: "#original_text"
+})</script>
+{% endblock %}
+
+{% block data_input_form %}
+<input type='checkbox' name='is_split' style='display:none'>
+<input type='number' name="is_split_confidence" min="1" max="5" style='display:none'>
+<input type='number' name="sentence_for_A" style='display:none'>
+<input type='number' name="sentence_for_A_confidence" min="1" max="5" style='display:none'>
+<input type='number' name="sentence_for_B" style='display:none'>
+<input type='number' name="sentence_for_B_confidence" min="1" max="5" style='display:none'>
+<input type='number' name='paragraph_id' value='{{center_paragraph_id}}' style='display:none'>
+<input type='number' name="begin1" style='display:none'>
+<input type='number' name="end1" style='display:none'>
+<input type='number' name="begin2_A" style='display:none'>
+<input type='number' name="end2_A" style='display:none'>
+<input type='number' name="begin2_B" style='display:none'>
+<input type='number' name="end2_B" style='display:none'>
+{% endblock %}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" type='text/css' href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" type='text/css' href="{% static 'css/summary.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.js"></script>
+
+  </head>
+  <body style="font-size:0.8rem">
+    <nav id='task_title_nav' class="navbar navbar-expand-lg navbar-light" style="background-color:#eeeeee">
+      <div id='task_title' class="navbar-brand">
+        {% block task_title %}
+        {% endblock %}
+      </div>
+    </nav>
+    <div class='main_box container'>
+      <div class="prompt_box row">
+        <div class='prompt col-sm-12'>
+          {% block task_description %}
+          {% endblock %}
+
+        </div>
+      </div>
+      <div class="two_boxes row">
+        <div class='summary_box col-sm-6'>
+          <h6 class="heading">Summary of the whole novel</h4>
+          <div class="contents">
+          {% block summary %}
+          {% endblock %}
+          </div>
+        </div>
+        <div class='original_text col-sm-6'>
+          <div class = 'heading'>
+          <h6 style="display: inline">Parts of the original text</h6>
+          <button id='scroll_back' class='btn btn-sm btn-primary' style="float: right; display:inline; height: 29px; font-size:1rem; padding-top: 2px;">Scroll back</button>
+        </div>
+          <div class="contents">
+          {% block original_text %}
+          {% endblock %}
+          </div>
+        </div>
+      </div>
+      <div class='submit_box'>
+        {% block submit %}
+        {% endblock %}
+      </div>
+    </div>
+      <div class="modal fade" id="confidence_modal" tabindex="-1" role="dialog" aria-labelledby="confidence_modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confidence_modalLabel">Rate your confidence about the decision</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p id='decision_text'></p>
+              <p>How much are you confident about your decision?
+                The level of confidence does not affects the acceptance of your submission.</p>
+                <ul class='likert'>
+                  <li>
+                    <input type="radio" name="likert" value="1">
+                    <label>Strongly Unconfident</label>
+                  </li>
+                  <li>
+                    <input type="radio" name="likert" value="2">
+                    <label>Unconfident</label>
+                  </li>
+                  <li>
+                    <input type="radio" name="likert" value="3">
+                    <label>Neutral</label>
+                  </li>
+                  <li>
+                    <input type="radio" name="likert" value="4">
+                    <label>Confident</label>
+                  </li>
+                  <li>
+                    <input type="radio" name="likert" value="5">
+                    <label>Strongly Confident</label>
+                  </li>
+                </ul>
+              </div>
+              <div class="modal-footer">
+                <form method="post">{% csrf_token %}
+                <input type='string' style='display:none' name='Turker_id' id='turker_id_input'>
+                {% block data_input_form %}
+                {% endblock %}
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="modal_proceed" type="button" class="btn btn-success">Proceed</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="tutorial_modal" tabindex="-1" role="dialog" aria-labelledby="confidence_modalLabel" aria-hidden="true">
+          <div class="fullscreen-modal modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="tutorial_modalLabel">Tutorial</h5>
+              </div>
+              <div class="modal-body">
+                <h5 id='tuto_text'></h5>
+                <img id='tuto_img_box' style='border: 3px solid black; display: block;width:75%; margin: auto'></img>
+              </div>
+                <div class="modal-footer">
+                  <button id='tuto_close' type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button id="tuto_prev" type="button" class="btn btn-secondary">Prev</button>
+                  <button id="tuto_next" type="button" class="btn btn-success">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <script>
+        apply_tuto_content = function(tutostring,tutoimgname, keyword=false, keyword_explanation=false){
+          if(keyword){
+            tutostring = tutostring.replace(keyword, "<a href='#' class='tutorial_keyword' data-toggle='tooltip' title='"+keyword_explanation+"' data-placement='top'>"+keyword+"</a>")
+          }
+          $("#tuto_text").empty().append(tutostring)//.text(tutostring);
+          $("#tuto_img_box").attr("src", "{% static 'img/' %}"+tutoimgname+".png")
+          if(keyword){
+            $(".tutorial_keyword").tooltip()
+          }
+        }
+        </script>
+  </body>
+</html>

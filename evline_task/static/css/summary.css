@@ -1,0 +1,8 @@
+.sum_sen{
+  color: black;
+  cursor: default;
+}
+.sum_sen:hover{
+  color: black;
+  text-decoration: none;
+}
