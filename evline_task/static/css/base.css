@@ -30,11 +30,7 @@ body{
   width: 100%;
   overflow-y: scroll;
 }
-.original_text{
-  height: 100%;
-  border-left: 1px solid black;
-  overflow-y: scroll;
-}
+
 .submit_box{
   height: 6%;
 }

@@ -3,6 +3,10 @@ var can_end=false;
 var cur_selected;
 var cur_attention;
 
+//
+var tooltip_A_shown=true;
+var tooltip_B_shown=true;
+
 //tutorial related
 var tutoindex;
 var tutoAdone=false;
@@ -28,6 +32,7 @@ var tutorialB = [
 ]
 
 $(document).ready(function(){
+  $("input[name='Task_id']").val(Task_id)
   $("#tutorial_modal").modal({backdrop:'static', keyboard: false})
   initialize_button()
   $("#scroll_back").on("click", function(){
@@ -39,6 +44,10 @@ $(document).ready(function(){
   })
   $("#see_next").on("click", function(){
     expand_next()
+  })
+  $(".original_text").on("scroll", function(){
+    tooltip_appearance("#paragraph_A")
+    tooltip_appearance("#paragraph_B")
   })
 })
 //initialize all the buttons...
@@ -56,7 +65,7 @@ initialize_button = function(){
   $("#paragraph_A").css("background-color", "#cedaed").tooltip("show")
   $("#paragraph_B").css("background-color", "#ceede6").tooltip("show")
   $("#task_title_text").text("Decide whether there is a temporal leap in between two parts of the novel with background color")
-  $(".prompt").empty().append("<p>You are going to read a summary of a novel, and a part of the novel’s original text. In the original text, there are paragraph A. and B., each with a background color. After reading them, you will answer the following question : In between  A. and B. in the text below, is there any temporal leap?</p>")
+  $(".prompt").empty().append("<p>You are going to read a summary of a novel, and a part of the novel’s original text. In the original text, there are paragraph A and B, each with a background color. After reading them, you will answer the following question : In between  A. and B. in the text below, is there any temporal leap?</p>")
   .append("<p>*  example of temporal leap : a story in reverse order or going back and forth between past and future events.</p>")
   $(".sum_sen").off("click")
   $("#yes_prev").text("There is a temporal leap").removeClass("btn-danger").addClass("btn-success")
@@ -82,15 +91,15 @@ show_modal = function(is_split_impending, can_end_impending){
   }else if(is_split && !can_end){
     $("#modal_proceed").attr('type', 'button').text('Proceed')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text A.")
-    $("#decision_text").append("<p>"+$("#"+cur_selected.toString()).text()+"</p>")
+    $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }else if(is_split && can_end){
     $("#modal_proceed").attr('type', 'submit').text('Submit')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text B.")
-    $("#decision_text").append("<p>"+$("#"+cur_selected.toString()).text()+"</p>")
+    $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }else if(!is_split && can_end){
     $("#modal_proceed").attr('type', 'submit').text('Submit')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text A and B.")
-    $("#decision_text").append("<p>"+$("#"+cur_selected.toString()).text()+"</p>")
+    $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }
   //initialize proceed button -disabled
   $("#modal_proceed").prop('disabled',true)
@@ -159,7 +168,7 @@ get_position_in_summary = function(){
   if(is_split && !can_end){
     //split case + getting the position of A in the summary
       // data should not be returned
-    $("#paragraph_A").css("background-color", "#cedaed").tooltip('show')
+    $("#paragraph_A").css("background-color", "#cedaed")//.tooltip('show')
     $("#paragraph_B").css("background-color", "transparent")
     cur_attention = 'paragraph_A'
     adjust_scroll_height('original_text', 'paragraph_A')
@@ -170,7 +179,7 @@ get_position_in_summary = function(){
     //split case + getting the position of B in the summary
       // data should be returned
     $("#paragraph_A").css("background-color", "transparent")
-    $("#paragraph_B").css("background-color", "#ceede6").tooltip('show')
+    $("#paragraph_B").css("background-color", "#ceede6")//.tooltip('show')
     cur_attention = 'paragraph_B'
     adjust_scroll_height('original_text', 'paragraph_B')
     $("#task_title_text").text("Which sentence of the summary is explaining the green part of the original text?")
@@ -179,8 +188,8 @@ get_position_in_summary = function(){
   }else{
     //non split case
       // data should be returned
-    $("#paragraph_A").css("background-color", "#cedaed").tooltip('show')
-    $("#paragraph_B").css("background-color", "#ceede6").tooltip('show')
+    $("#paragraph_A").css("background-color", "#cedaed")//.tooltip('show')
+    $("#paragraph_B").css("background-color", "#ceede6")//.tooltip('show')
     cur_attention = 'paragraph_A'
     adjust_scroll_height('original_text', 'paragraph_A')
     $("#task_title_text").text("Which sentence of the summary is explaining highlighted parts of the original text?")
@@ -231,9 +240,9 @@ summary_buttonize=function(){
     cur_selected = parseInt($(this).attr("id"))
     summary_buttonize()
     $(this).off("mouseout").on("mouseout", function(){
-      $(this).css("background-color", "#dddddd")
+      $(this).css("background-color", "#ffa500")
     })
-    $(this).css("background-color", "#dddddd").off("click").on("click", function(){
+    $(this).css("background-color", "#ffa500").off("click").on("click", function(){
       cur_selected = -1;
       summary_buttonize()
     })
@@ -246,7 +255,7 @@ adjust_scroll_height=function(container_id, object_id){
   //console.log($("."+container_id).offset().top)
   //console.log($("#"+object_id).offset().top)
   $("."+container_id).animate({
-    scrollTop: $("."+container_id).scrollTop()+$("#"+object_id).offset().top-$("."+container_id).offset().top-39
+    scrollTop: $("."+container_id).scrollTop()+$("#"+object_id).offset().top-$("."+container_id).offset().top-39-48
   }, 500)
 }
 expand_previous = function(){
@@ -255,6 +264,13 @@ expand_previous = function(){
   }else{
     beginning_id--;
     $("#text_content").prepend("<p style='color:grey'>"+total_paragraphs[beginning_id]['paragraph_string']+"</p>")
+    if(beginning_id==0){
+      $("#see_previous").prop("disabled", true).text("You reached the beginning of the text")
+    }
+    $("#paragraph_A").tooltip("update")
+    $("#paragraph_B").tooltip("update")
+    tooltip_appearance("#paragraph_A")
+    tooltip_appearance("#paragraph_B")
   }
 }
 expand_next = function(){
@@ -263,38 +279,34 @@ expand_next = function(){
   }else{
     ending_id++;
     $("#text_content").append("<p style='color:grey'>"+total_paragraphs[ending_id]['paragraph_string']+"</p>")
+    if(ending_id==total_paragraphs.length-1){
+      $("#see_next").prop("disabled", true).text("You reached the end of the text")
+    }
+    $("#paragraph_A").tooltip("update")
+    $("#paragraph_B").tooltip("update")
+    tooltip_appearance("#paragraph_A")
+    tooltip_appearance("#paragraph_B")
   }
 }
 
-Show_tuto=function(tutodone,tutotext,tutoimgname, keyword = false, keyword_explanation =false){
-  $("#tutorial_modal").modal("show")
-  tutoindex=0;
-  if(!tutodone){
-    $("#tuto_close").css("display", 'none')
+
+tooltip_appearance = function(paragraph_id){
+  var para_pos = $(paragraph_id).offset().top
+  var para_outerheight = $(paragraph_id).outerHeight()
+  var original_outerheight = $(".original_text").outerHeight()
+  var original_offset = $(".original_text").offset().top
+  if(original_offset+39>para_pos+para_outerheight/2 ){
+    if($(paragraph_id).attr("aria-describedby")!=undefined){
+      $(paragraph_id).tooltip('hide')
+      }
+  }else if(original_offset+original_outerheight<para_pos+para_outerheight/2){
+    if($(paragraph_id).attr("aria-describedby")!=undefined){
+      $(paragraph_id).tooltip('hide')
+    }
   }else{
-    $("#tuto_close").css("display", '')
+    if($(paragraph_id).attr("aria-describedby")==undefined){
+      $(paragraph_id).tooltip('show')
+      }
   }
-  $("#tuto_prev").prop("disabled", true)
-  apply_tuto_content(tutotext[tutoindex], tutoimgname+tutoindex.toString(), keyword, keyword_explanation)
-  $("#tuto_next").off('click').on('click', function(){
-    if(tutoindex==0){
-      $("#tuto_prev").prop("disabled", false)
-    }
-    tutoindex++;
-    if(tutoindex>=tutotext.length){
-      //end tutorial
-      $("#tutorial_modal").modal("hide")
-    }else{
-      apply_tuto_content(tutotext[tutoindex], tutoimgname+tutoindex.toString(), keyword, keyword_explanation)
-    }
-  })
-  $("#tuto_prev").off('click').on('click', function(){
-    tutoindex--;
-    if(tutoindex<=0){
-      $("#tuto_prev").prop("disabled", true)
-    }
-    apply_tuto_content(tutotext[tutoindex], tutoimgname+tutoindex.toString(), keyword, keyword_explanation)
-  })
-  return true;
 
 }

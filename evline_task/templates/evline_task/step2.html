@@ -1,0 +1,79 @@
+{% extends 'evline_task/base.html' %}
+{% load static %}
+
+{% block css %}
+<script>
+var chunk1_id = parseInt({{chunk1_id}})
+var chunk2_id = parseInt({{chunk2_id}})
+var summary_id = parseInt({{summary_sentence.summary_id}})
+console.log(summary_id)
+</script>
+
+<link rel="stylesheet" type='text/css' href="{% static 'css/step2.css' %}">
+{% endblock %}
+
+<!--title-->
+{% block task_title %}
+<div id='task_title_text' style='display:inline'>Among two parts of text, which might have happened earlier?</div>
+<button id='tuto_show' class='btn btn-secondary' style='float: right'>Tutorial</button>
+{% endblock %}
+
+<!--summary-->
+{% block summary %}
+  {% for summary_sentence in summary_sentences %}
+    <a id={{summary_sentence.summary_id}} class="sum_sen disabled" href="#">{{summary_sentence.sentence_string}}</a>
+  {% endfor %}
+{% endblock %}
+
+<!--original text title button-->
+{%block original_text_title%}
+
+<h6 class='col-sm-6'>Part of text</h6>
+<h6 class='col-sm-6'>Part of text</h6>
+
+{%endblock%}
+
+<!--original texts-->
+{% block original_text %}
+
+<div id='chunk1' class='col-sm-6' style="overflow-y: scroll;">
+  {%for para in chunk1_set%}
+    <p>
+      {{para.paragraph_string}}
+    </p>
+  {%endfor%}
+</div>
+
+<div id='chunk2' class='col-sm-6' style="overflow-y: scroll">
+  {%for para in chunk2_set%}
+    <p>
+      {{para.paragraph_string}}
+    </p>
+  {%endfor%}
+</div>
+<script>
+  var Task_id ='{{Task_id}}'
+  var pts_id ='{{pts_id}}'
+</script>
+{% endblock %}
+
+{% block submit %}
+<script type="text/javascript" src="{% static 'js/step2.js' %}" /></script>
+<div class='col-sm-4'></div>
+<div class='col-sm-4'>
+  <button id='A_happen' class='decision btn btn-secondary btn-sm' style='display:block; margin: auto;'>It happens earlier.</button>
+</div>
+<div class='col-sm-4'>
+  <button id='B_happen' class='decision btn btn-secondary btn-sm' style='display:block; margin: auto;'>It happens earlier.</button>
+</div>
+{% endblock %}
+
+{% block data_input_form %}
+<input type='text' name='Turker_id' style="display:none">
+<input type='number' name='summary_id' style="display:none">
+<input type='number' name='previous_num' style="display:none">
+<input type='number' name='next_num' style="display:none">
+<input type='number' name='confidence' max='5' min='1' style="display:none">
+<input type='string' name='Task_id' style='display:none'>
+<input tyep='number' name='pts_id' style='display:none'>
+{% endblock %}

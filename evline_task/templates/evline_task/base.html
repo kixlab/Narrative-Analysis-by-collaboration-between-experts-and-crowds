@@ -3,12 +3,14 @@
   <head>
     {% load static %}
     <link rel="stylesheet" type='text/css' href="{% static 'css/base.css' %}">
+    {% block css %}
+    {% endblock %}
     <link rel="stylesheet" type='text/css' href="{% static 'css/summary.css' %}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.js"></script>
-
+    <script src="{% static 'js/tutorial.js' %}"></script>
   </head>
   <body style="font-size:0.8rem">
     <nav id='task_title_nav' class="navbar navbar-expand-lg navbar-light" style="background-color:#eeeeee">
@@ -35,10 +37,10 @@
         </div>
         <div class='original_text col-sm-6'>
           <div class = 'heading'>
-          <h6 style="display: inline">Parts of the original text</h6>
-          <button id='scroll_back' class='btn btn-sm btn-primary' style="float: right; display:inline; height: 29px; font-size:1rem; padding-top: 2px;">Scroll back</button>
+          {% block original_text_title %}
+          {% endblock %}
         </div>
-          <div class="contents">
+          <div class="contents origin_contents">
           {% block original_text %}
           {% endblock %}
           </div>
@@ -60,16 +62,16 @@
             </div>
             <div class="modal-body">
               <p id='decision_text'></p>
-              <p>How much are you confident about your decision?
-                The level of confidence does not affects the acceptance of your submission.</p>
+              <p>How are you confident about your decision?
+                The level of confidence does not affect the acceptance of your submission.</p>
                 <ul class='likert'>
                   <li>
                     <input type="radio" name="likert" value="1">
-                    <label>Strongly Unconfident</label>
+                    <label>Extremely Uncertain</label>
                   </li>
                   <li>
                     <input type="radio" name="likert" value="2">
-                    <label>Unconfident</label>
+                    <label>Uncertain</label>
                   </li>
                   <li>
                     <input type="radio" name="likert" value="3">

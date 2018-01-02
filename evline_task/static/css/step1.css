@@ -1,0 +1,5 @@
+.original_text{
+  height: 100%;
+  border-left: 1px solid black;
+  overflow-y: scroll;
+}

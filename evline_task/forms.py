@@ -15,7 +15,17 @@ class Step1Form(forms.Form):
     end2_A = forms.IntegerField()
     begin2_B = forms.IntegerField()
     end2_B = forms.IntegerField()
+    Task_id = forms.CharField()
 
 class Feedback1Form(forms.Form):
     Turker_id = forms.CharField()
     step1feedback = forms.CharField()
+
+class Step2Form(forms.Form):
+    Turker_id = forms.CharField()
+    previous_num = forms.IntegerField()
+    next_num = forms.IntegerField()
+    confidence = forms.IntegerField()
+    summary_id = forms.IntegerField()
+    Task_id = forms.CharField()
+    pts_id = forms.IntegerField()
