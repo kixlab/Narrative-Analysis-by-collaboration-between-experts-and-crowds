@@ -1,7 +1,8 @@
 from .models import Novel, Paragraph, Summary_Sentence, Step1_Task_A, Step1_Task_B, TaskMarker_Step1, Chunk, Possible_Tasks_Step2, TaskMarker_Step2
 from nltk.tokenize import sent_tokenize
 import datetime
-from django.db.models import Count, Sum, When, Q, F, Case, IntegerField
+from django.db.models import Count, Sum, When, Q, F, Case, IntegerField, FloatField
+from django.db.models.functions import Cast
 import random
 import string
 def Novel_Data_Gen(novel_id):
@@ -59,6 +60,50 @@ def Pick_Step1_task(novel_id):
     }
     return data
 
+def Step1_Visualize(novel_id, required_worker = 1):
+    novel = Novel.objects.get(title=novel_id)
+    Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
+    if Step1A_count == Paragraph.objects.filter(novel = novel).count()-1:
+        paragraphs = Paragraph.objects.filter(novel=novel)
+        paragraphs = paragraphs.exclude(paragraph_id = paragraphs.count()-1)
+        paragraph_split = (paragraphs.values('step1_task_a__refer_paragraph__paragraph_id').annotate(total_sum = 10*Count('step1_task_a')).annotate(split_sum = Sum(Case(When(step1_task_a__is_separate=True, then=5+F('step1_task_a__confidence')),When(step1_task_a__is_separate=False, then= 5-F('step1_task_a__confidence')), output_field=IntegerField()))).order_by('step1_task_a__refer_paragraph__paragraph_id'))
+        paragraph_split = paragraph_split.annotate(split_sum_f=Cast('split_sum', FloatField())).annotate(total_sum_f=Cast('total_sum', FloatField())).annotate(weight = F('split_sum_f')/F('total_sum_f'))
+        print(paragraph_split)
+        splits=[]
+        for one_split in paragraph_split:
+            para_num = one_split['step1_task_a__refer_paragraph__paragraph_id']
+            if one_split['split_sum']>5:
+                if para_num not in splits:
+                    splits.append(para_num)
+        splits.append(paragraphs.count())
+        cur_begin = 0
+        relation_results_chunk = []
+        for idx, split in enumerate(splits):
+            #apply summary_sentence for each chunks
+            taskb = Step1_Task_B.objects.filter(novel=novel,refer_paragraph__paragraph_id__in=range(cur_begin, split+1)).values('sentence__summary_id').annotate(sentence_sum = Sum('confidence'), sen_count=Count('confidence')).order_by('-sentence_sum')
+            relation_results_chunk.append(list(taskb))
+            cur_begin = split + 1
+        total_paragraphs = Paragraph.objects.filter(novel=novel)
+        relation_results_paragraph =[]
+        for paragraph in total_paragraphs:
+            taskb = Step1_Task_B.objects.filter(novel=novel, refer_paragraph = paragraph).values('sentence__summary_id').annotate(sentence_sum = Sum('confidence'), sen_count= Count('confidence')).order_by('-sentence_sum')
+            relation_results_paragraph.append(list(taskb))
+        splits = list(splits)
+        total_paragraphs = total_paragraphs.values('paragraph_string')
+        summary_sentences = Summary_Sentence.objects.filter(novel=novel)
+
+        data = {
+            'total_paragraphs': total_paragraphs,
+            'summary_sentences': summary_sentences,
+            'relation_results_chunk':relation_results_chunk,
+            'relation_results_paragraph':relation_results_paragraph,
+            'paragraph_split': paragraph_split,
+            'splits': splits,
+        }
+        return data
+    else:
+        return False
+
 def Step1_Aggregate(novel_id, required_worker = 1):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
@@ -79,6 +124,8 @@ def Step1_Aggregate(novel_id, required_worker = 1):
                     splits.append(para_num)
         splits.append(paragraphs.count())
         cur_begin = 0
+        print(paragraph_split)
+        print(splits)
         ########################FOR RENEWING CHUNK -deletion
         Chunk.objects.all().delete()
         Possible_Tasks_Step2.objects.all().delete()
@@ -86,12 +133,12 @@ def Step1_Aggregate(novel_id, required_worker = 1):
         for idx, split in enumerate(splits):
             #apply summary_sentence for each chunks
             taskb = Step1_Task_B.objects.filter(refer_paragraph__paragraph_id__in=range(cur_begin, split+1)).values('sentence__summary_id').annotate(sentence_sum = Sum('confidence')).order_by('-sentence_sum')
+            print(list(taskb))
             summary_sentence = Summary_Sentence.objects.get(novel=novel, summary_id=taskb[0]['sentence__summary_id'])
             #generate possible tasks for step 2
             new_chunk = Chunk(novel=novel, summary_sentence=summary_sentence, chunk_id = idx, begin_paragraph=cur_begin, end_paragraph=split)
             cur_begin = split+1
             new_chunk.save()
-        print(splits)
         pts_id=0
         #generate possible tasks
         summary_sentences = Summary_Sentence.objects.filter(novel=novel)

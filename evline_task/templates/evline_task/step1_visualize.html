@@ -1,0 +1,47 @@
+{% extends 'evline_task/base.html' %}
+{% load evline_extras %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type='text/css' href="{% static 'css/step1_visualize.css' %}">
+{% endblock %}
+
+{% block summary %}
+  {% for summary_sentence in summary_sentences %}
+    <div class='col-sm-9 sum_sen' id='sum_sen_{{forloop.counter0}}'>
+        {{summary_sentence.sentence_string}}
+    </div>
+  {% endfor %}
+{% endblock %}
+
+{% block original_text %}
+<div class='chunk' id='chunk_0' style='background-color: #cfeee7'>
+  {% for paragraph in total_paragraphs%}
+  <div id='paragraph_{{forloop.counter0}}'>
+    <p class="paragraph">
+      {{paragraph.paragraph_string}}
+    </p>
+  </div>
+    {% if splits|inlist:forloop.counter0 %}
+    </div>
+      {% if forloop.counter < total_paragraphs.count %}
+        {% if splits|find_index:forloop.counter0|divisibleby:2 %}
+          <div class='chunk' id='chunk_{{splits|find_index:forloop.counter0|add:1}}' style='background-color: #dfebfe'>
+        {% else %}
+          <div class='chunk' id='chunk_{{splits|find_index:forloop.counter0|add:1}}' style='background-color: #cfeee7'>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    {% if forloop.counter0 < paragraph_split.count %}
+      <div id='paragraph_border__{{forloop.counter0}}' class='paragraph_border' style='opacity:{{paragraph_split|weight:forloop.counter0}}'></div>
+    {% endif %}
+  {% endfor %}
+  <script>
+  var relation_results_chunk = {{relation_results_chunk|safe}}
+  var relation_results_paragraph = {{relation_results_paragraph|safe}}
+  console.log(relation_results_chunk)
+  </script>
+  <script type="text/javascript" src="{% static 'js/jsplumb.js' %}" /></script>
+  <script type="text/javascript" src="{% static 'js/step1_visualize.js' %}" /></script>
+
+{% endblock %}

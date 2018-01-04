@@ -7,7 +7,7 @@
 
 <!--title-->
 {% block task_title %}
-<div id="task_title_text" style="display:inline">Decide whether there is a temporal leap in between two paragraphs in darker colors</div>
+<div id="task_title_text" style="display:inline">Which sentence of the summary is explaining the event that includes part A of the original text?</div>
 <button id='tuto_show' class='btn btn-secondary' style='float: right'>Tutorial</button>
 {% endblock %}
 
@@ -21,12 +21,12 @@
 <!--original text's title button-->
 {%block original_text_title%}
 <h6 style="display: inline">Parts of the original text</h6>
-<button id='scroll_back' class='btn btn-sm btn-primary' style="float: right; display:inline; height: 29px; font-size:1rem; padding-top: 2px;">Scroll back</button>
+<button id='scroll_back' class='btn btn-sm btn-secondary' style="float: right; display:inline; height: 29px; font-size:1rem; padding-top: 2px;">Scroll back</button>
 {%endblock%}
 
 <!--original text-->
 {% block original_text %}
-<button id='see_previous' class='btn btn-secondary' style="width:100%; margin-bottom:10px">See the previous part</button>
+<button id='see_previous' class='btn btn-info' style="width:100%; margin-bottom:10px">See the previous part</button>
 <div id="text_content">
   {% for paragraph in paragraphs %}
     {% if paragraph.paragraph_id == center_paragraph_id %}
@@ -39,7 +39,7 @@
     {{paragraph.paragraph_string}}</p>
   {% endfor %}
 </div>
-<button id='see_next' class='btn btn-secondary' style="width:100%; margin-bottom:10px">See the next part</button>
+<button id='see_next' class='btn btn-info' style="width:100%; margin-bottom:10px">See the next part</button>
 <script>
   var total_paragraphs ={{total_paragraphs|safe}}
   var beginning_id = Math.max({{center_paragraph_id}}-4, 0);
@@ -51,8 +51,9 @@
 {% block submit %}
 
 <div style="float:right; display:inline">
-<button id='yes_prev' class='btn btn-success btn-sm'>There is temporal leap</button>
-<button id='no_next' class='btn btn-danger btn-sm'>There is no temporal leap</button>
+<button id='only_prev' class='btn btn-secondary btn-sm' style='display:none'>Previous step</button>
+<button id='yes_prev' class='btn btn-secondary btn-sm' style='display:none'>There is temporal leap</button>
+<button id='no_next' class='btn btn-success btn-sm'>Proceed</button>
 </div>
 <script type="text/javascript" src="{% static 'js/step1.js' %}" /></script>
 <script>$('[data-toggle="tooltip"]').tooltip("show").tooltip({

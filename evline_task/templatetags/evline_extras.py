@@ -8,3 +8,14 @@ def para_string(List, i):
 @register.filter
 def index(List, i):
     return List[int(i)]
+
+@register.filter
+def weight(List, i):
+    return List[int(i)]['weight']
+
+@register.filter
+def inlist(List, i):
+    return i in List
+@register.filter
+def find_index(List, val):
+    return List.index(val)

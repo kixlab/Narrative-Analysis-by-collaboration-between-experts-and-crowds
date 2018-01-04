@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from .models import Novel, Summary_Sentence, Paragraph, Step1_Task_A, Step1_Task_B, Feedback_Step1, Chunk, Step2_Task, Feedback_Step2, TaskMarker_Step1
-from .database_manage import Novel_Data_Gen, Pick_Step1_task, Step1_Aggregate, Pick_Step2_task, temporary_for_data_exploration, TaskMarker_Step2
+from .database_manage import Novel_Data_Gen, Pick_Step1_task, Step1_Aggregate, Pick_Step2_task, temporary_for_data_exploration, TaskMarker_Step2, Step1_Visualize
 from .forms import Step1Form, Feedback1Form, Step2Form
 import json
 # Create your views here.
@@ -58,12 +58,13 @@ def step1(request, novel_id):
     return render(request, 'evline_task/step1.html', texts)
 
 def step1_aggregate(request, passwd, novel_id):
-    result = Step1_Aggregate(novel_id)
+    result = Step1_Visualize(novel_id)
     if passwd =='N1kixlab':
         if result == False:
             return HttpResponse("not sufficient data. Crowdsource more")
         else:
-            return HttpResponse("Aggregation complete")
+            print(result['relation_results_paragraph'])
+            return render(request, 'evline_task/step1_visualize.html', result)
     else:
         return HttpResponse("Password not correct")
 

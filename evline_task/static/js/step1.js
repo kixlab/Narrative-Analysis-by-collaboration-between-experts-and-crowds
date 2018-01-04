@@ -1,5 +1,6 @@
-var is_split=false;
+var in_pre=true;
 var can_end=false;
+
 var cur_selected;
 var cur_attention;
 
@@ -11,30 +12,34 @@ var tooltip_B_shown=true;
 var tutoindex;
 var tutoAdone=false;
 var tutoBdone=false;
+var tutoCdone=false;
 var tutorialA = [
-  'In this task, you will first decide whether there is a temporal leap in between two parts of a novel.',
-  'First you will read the summary and grasp the overall story line of the novel.',
-  'Then you will read a part of the novel,',
-  'and guess whether there is a temporal leap in between those two colored parts of the novel.',
-  'If you cannot understand the context, you can expand the text and learn more about the novel.',
-  'Also if you are lost in the text and want to find the colored parts again, hit SCROLL BACK.',
-  'If you are done with guessing, make your decision, whether there is a temporal leap in between colored texts, or not.'
+  'In this task, you will decide whether there is a temporal leap in between two parts of a novel you just related with the summary.',
+  'If you are done with guessing, make your decision, whether there is a temporal leap in between text A and B, or not.'
 ]
 var tutorialAkeyword = 'temporal leap'
 var tutorialAkeyword_explanation = 'A temporal leap happens when a story is flowing in reverse order or going back and forth between past and future events.'
 
 var tutorialB = [
-  'In this stage, you will be relating the summary and the text you read.',
-  'You will choose which sentence of the summary best describes the text with colored background(text labeled A and B).',
-  'You will choose the sentence by directly clicking them',
-  'If you choose one, proceed with the proceed button. You can also go to previous step if you want to change your task.',
-  'You will do the task for both of text A and B.'
+  'In this HIT, you will do three subtasks that contribute to ordering events of a novel in chronological order.',
+  'First two tasks will be about relating the event that contains a paragraph with a sentence of summary.',
+  'The last task will be about deciding whether a temporal leap exists in between two paragraphs.',
+  'First you will read the summary and grasp the overall story line of the novel.',
+  'Then you will read a part of the novel,',
+  'and choose which sentence of the summary best describes the text A, by directly clicking a sentence.',
+  'If you cannot understand the context, you can expand the text and learn more about the novel.',
+  'Also if you are lost in the text and want to find the target text again, hit SCROLL BACK.',
+  'If you choose one, proceed with the proceed button.',
+]
+var tutorialC = [
+  'Now you will do the same task of relating the part of original text to a summary sentence with the text B.',
 ]
 
 $(document).ready(function(){
   $("input[name='Task_id']").val(Task_id)
   $("#tutorial_modal").modal({backdrop:'static', keyboard: false})
-  initialize_button()
+  //initialize_button()
+  get_position_in_summary()
   $("#scroll_back").on("click", function(){
     adjust_scroll_height('original_text', cur_attention)
   })
@@ -68,42 +73,47 @@ initialize_button = function(){
   $(".prompt").empty().append("<p>You are going to read a summary of a novel, and a part of the novel’s original text. In the original text, there are paragraph A and B, each with a background color. After reading them, you will answer the following question : In between  A. and B. in the text below, is there any temporal leap?</p>")
   .append("<p>*  example of temporal leap : a story in reverse order or going back and forth between past and future events.</p>")
   $(".sum_sen").off("click")
-  $("#yes_prev").text("There is a temporal leap").removeClass("btn-danger").addClass("btn-success")
+  $("#only_prev").css("display", "").off("click").on("click", function(){
+    in_pre = true;
+    can_end = true;
+    get_position_in_summary();
+  })
+  $("#yes_prev").text("There is a temporal leap").removeClass("btn-secondary").addClass("btn-primary")
   .off("click").on("click", function(){
     // make  popup modal
     show_modal(true, false);
   })
-  $("#no_next").text("There is no temporal leap").removeClass("btn-success").addClass("btn-danger")
+  $("#no_next").text("There is no temporal leap").removeClass("btn-success").addClass("btn-primary")
   .off("click").on("click", function(){
     //make popup modal
     show_modal(false, true);
   })
 }
-show_modal = function(is_split_impending, can_end_impending){
+show_modal = function(in_pre_impending, can_end_impending){
   //say about the decision and change input type
-  if(!is_split && !can_end){
-    $("#modal_proceed").attr('type', 'button').text('Proceed')
-    if(is_split_impending){
+  if(!in_pre && !can_end){
+    $("#modal_proceed").attr('type', 'submit').text('Submit')
+    if(in_pre_impending){
       $("#decision_text").text("You decided that there is a temporal leap between text A and B.")
-    }else if(!is_split_impending){
+    }else if(!in_pre_impending){
       $("#decision_text").text("You decided that there is no temporal leap between text A and B.")
     }
-  }else if(is_split && !can_end){
+  }else if(in_pre && !can_end){
     $("#modal_proceed").attr('type', 'button').text('Proceed')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text A.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
-  }else if(is_split && can_end){
-    $("#modal_proceed").attr('type', 'submit').text('Submit')
+  }else if(in_pre && can_end){
+    $("#modal_proceed").attr('type', 'button').text('Proceed')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text B.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
-  }else if(!is_split && can_end){
+  }else if(!in_pre && can_end){
     $("#modal_proceed").attr('type', 'submit').text('Submit')
     $("#decision_text").text("You decided that the following sentence best expresses the content in text A and B.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }
   //initialize proceed button -disabled
   $("#modal_proceed").prop('disabled',true)
-  $("input[name=likert]").off("click").on('click', function(){
+  $("input[name=likert]").prop('checked', false).off("click").on('click', function(){
     $(this).off("click")
     $("#modal_proceed").prop('disabled',false)
   })
@@ -113,25 +123,26 @@ show_modal = function(is_split_impending, can_end_impending){
     var checked = $("input:radio[name=likert]:checked").val()
     if(checked != undefined){
       // store input
-      if(!is_split && !can_end){
-        $("input[name=is_split]").prop("checked", is_split_impending)
+      if(!in_pre && !can_end){
+        $("input[name=is_split]").prop("checked", in_pre_impending)
         $("input[name=is_split_confidence]").val(parseInt(checked))
         $("input[name=begin1]").val(beginning_id)
         $("input[name=end1]").val(ending_id)
-      }else if(is_split && !can_end){
+        $("#turker_id_input").val(Math.random().toString(36).substring(5))
+
+      }else if(in_pre && !can_end){
         // TODO store input
         $("input[name=sentence_for_A]").val(cur_selected)
         $("input[name=sentence_for_A_confidence]").val(parseInt(checked))
         $("input[name=begin2_A]").val(beginning_id)
         $("input[name=end2_A]").val(ending_id)
-      }else if(is_split && can_end){
+      }else if(in_pre && can_end){
         // TODO store input
         $("input[name=sentence_for_B]").val(cur_selected)
         $("input[name=sentence_for_B_confidence]").val(parseInt(checked))
-        $("#turker_id_input").val(Math.random().toString(36).substring(5))
         $("input[name=begin2_B]").val(beginning_id)
         $("input[name=end2_B]").val(ending_id)
-      }else if (!is_split && can_end){
+      }else if (!in_pre && can_end){
         // TODO store input
         $("input[name=sentence_for_A]").val(cur_selected)
         $("input[name=sentence_for_A_confidence]").val(parseInt(checked))
@@ -143,20 +154,26 @@ show_modal = function(is_split_impending, can_end_impending){
         $("input[name=begin2_B]").val(beginning_id)
         $("input[name=end2_B]").val(ending_id)
       }
-      is_split = is_split_impending;
+      in_pre = in_pre_impending;
       can_end = can_end_impending
       //reset input
       $("input[name=likert]").prop("checked", false)
       $("#confidence_modal").modal('hide')
-      get_position_in_summary()
+      if(in_pre){
+        get_position_in_summary()
+      }else{
+        initialize_button()
+      }
     }else{
       alert("Select one option.")
     }
   })
 }
 get_position_in_summary = function(){
-  if(!tutoBdone){
+  if(!tutoBdone && !can_end){
     tutoBdone = Show_tuto(tutoBdone, tutorialB, 'Step1_B_')
+  }else if(!tutoCdone && can_end){
+    tutoCdone = Show_tuto(tutoCdone, tutorialC, 'Step1_C_')
   }
   $("#tuto_show").off("click").on("click", function(){
     Show_tuto(tutoBdone, tutorialB, 'Step1_B_')
@@ -165,25 +182,26 @@ get_position_in_summary = function(){
     //hightlight texts only
     console.log(cur_selected)
   cur_selected = -1
-  if(is_split && !can_end){
+  if(in_pre && !can_end){
     //split case + getting the position of A in the summary
       // data should not be returned
     $("#paragraph_A").css("background-color", "#cedaed")//.tooltip('show')
-    $("#paragraph_B").css("background-color", "transparent")
+    $("#paragraph_B").css("background-color", "#f4f4f4")
     cur_attention = 'paragraph_A'
     adjust_scroll_height('original_text', 'paragraph_A')
-    $("#task_title_text").text("Which sentence of the summary is explaining the blue part of the original text?")
-    $(".prompt").empty().append("<p>From the summary and the original text that you read, you might have grasped which sentences of the summary is explaining the parts of the original text. Now, decide which sentence of the summary best explains the event that includes the part of the text highlighted in blue, the text A.</p>")
+    $("#task_title_text").text("Which sentence of the summary is explaining the event that includes part A of the original text?")
+    $(".prompt").empty().append("<p>You are going to read a summary of a novel, and a part of the novel’s original text. In the original text, there are paragraph A and B, each with a background color. After reading them, you will answer the following question : Which sentence of the summary best explains the event that includes the part of the text highlighted in blue, the text A?</p>")
     .append("<p>You can select one of the sentences in the summary by clicking it.</p>")
-    }else if(is_split && can_end){
+    }else if(in_pre && can_end){
     //split case + getting the position of B in the summary
       // data should be returned
-    $("#paragraph_A").css("background-color", "transparent")
+      $("#only_prev").css("display", "none")
+    $("#paragraph_A").css("background-color", "#f4f4f4")
     $("#paragraph_B").css("background-color", "#ceede6")//.tooltip('show')
     cur_attention = 'paragraph_B'
     adjust_scroll_height('original_text', 'paragraph_B')
-    $("#task_title_text").text("Which sentence of the summary is explaining the green part of the original text?")
-    $(".prompt").empty().append("<p>From the summary and the original text that you read, you might have grasped which sentences of the summary is explaining the parts of the original text. Now, decide which sentence of the summary best explains the event that includes the part of the text highlighted in green, the text B.</p>")
+    $("#task_title_text").text("Which sentence of the summary is explaining the event that includes part B of the original text?")
+    $(".prompt").empty().append("<p>From the summary and the original text that you read, answer the following questions : Which sentence of the summary best explains the event that includes the part of the text highlighted in green, the text B?</p>")
     .append("<p>You can select one of the sentences in the summary by clicking it.</p>")
   }else{
     //non split case
@@ -200,31 +218,36 @@ get_position_in_summary = function(){
 
   //enable summary and button selection
   summary_buttonize()
-  $("#yes_prev").text("Previous step").removeClass("btn-success").addClass("btn-danger").off("click")
+  if(can_end){
+  $("#yes_prev").css("display", "").text("Previous step").removeClass("btn-primary").addClass("btn-secondary").off("click")
   .on("click", function(){
     //go to previous status
-    if(is_split && !can_end){
-      is_split = false;
-      initialize_button();
-    }else if(is_split && can_end){
+    //if(in_pre && !can_end){
+    //  in_pre = false;
+    //  initialize_button();
+    //}else
+    if(in_pre && can_end){
       can_end = false;
       get_position_in_summary();
-    }else{
-      can_end = false;
-      initialize_button();
-    }
+    }//else{
+      //can_end = false;
+      //initialize_button();
+    //}
 
   })
-  $("#no_next").text("Proceed").removeClass("btn-danger").addClass("btn-success").off("click")
+  }else{
+    $("#yes_prev").css("display", "none")
+  }
+  $("#no_next").text("Proceed").removeClass("btn-primary").addClass("btn-success").off("click")
   .on("click", function(){
     //show pop up for collecting rating
     if(cur_selected==-1){
       alert("Select one sentence from the summary")
     }else{
-      if(can_end){
-        show_modal(is_split, can_end)
+      if(!can_end){
+        show_modal(in_pre, !can_end)
       }else{
-        show_modal(true,true)
+        show_modal(false,false)
       }
 
     }

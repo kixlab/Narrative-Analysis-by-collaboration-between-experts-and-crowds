@@ -1,0 +1,24 @@
+.paragraph_border{
+  width: 100%;
+  height: 5px;
+  background-color: black;
+}
+
+.paragraph{
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.heading{
+  z-index: 10;
+}
+.original_text{
+  overflow-y: scroll;
+}
+.summary_box{
+  overflow-y: scroll;
+}
+.sum_sen{
+  border : solid 1px black;
+  border-right: solid 3px black;
+  margin-bottom: 15px;
+}
