@@ -14,15 +14,15 @@ var tutoAdone=false;
 var tutoBdone=false;
 var tutoCdone=false;
 var tutorialA = [
-  'In this task, you will decide whether there is a temporal leap in between two parts of a novel you just related with the summary.',
+  'In this task, you will decide whether there is a temporal leap in between two parts of the novel you just related with the summary.',
   'If you are done with guessing, make your decision, whether there is a temporal leap in between text A and B, or not.'
 ]
 var tutorialAkeyword = 'temporal leap'
-var tutorialAkeyword_explanation = 'A temporal leap happens when a story is flowing in reverse order or going back and forth between past and future events.'
+var tutorialAkeyword_explanation = 'A temporal leap happens when a story is flowing in nonlinear order or going back and forth between past and future events. ex) Memento and 500 days of summer'
 
 var tutorialB = [
   'In this HIT, you will do three subtasks that contribute to ordering events of a novel in chronological order.',
-  'First two tasks will be about relating the event that contains a paragraph with a sentence of summary.',
+  'First two tasks will be about relating the event that contains a paragraph with a sentence of a summary.',
   'The last task will be about deciding whether a temporal leap exists in between two paragraphs.',
   'First you will read the summary and grasp the overall story line of the novel.',
   'Then you will read a part of the novel,',
@@ -31,8 +31,6 @@ var tutorialB = [
   'Also if you are lost in the text and want to find the target text again, hit SCROLL BACK.',
   'If you choose one, proceed with the proceed button.',
 ]
-var tutorialBkeyword = 'temporal leap'
-var tutorialBkeyword_explanation = 'A temporal leap happens when a story is flowing in reverse order or going back and forth between past and future events.'
 
 var tutorialC = [
   'Now you will do the same task of relating the part of original text to a summary sentence with the text B.',
@@ -174,7 +172,7 @@ show_modal = function(in_pre_impending, can_end_impending){
 }
 get_position_in_summary = function(){
   if(!tutoBdone && !can_end){
-    tutoBdone = Show_tuto(tutoBdone, tutorialB, 'Step1_B_', tutorialBkeyword, tutorialBkeyword_explanation)
+    tutoBdone = Show_tuto(tutoBdone, tutorialB, 'Step1_B_', tutorialAkeyword, tutorialAkeyword_explanation)
   }else if(!tutoCdone && can_end){
     tutoCdone = Show_tuto(tutoCdone, tutorialC, 'Step1_C_')
   }
