@@ -10,6 +10,7 @@ body{
 
 #task_title_nav{
   overflow-x: hidden;
+  overflow-y: hidden;
   min-height: 0;
   height: 8%;
   border: 0px solid transparent;

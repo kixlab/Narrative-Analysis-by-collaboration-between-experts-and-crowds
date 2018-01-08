@@ -6,6 +6,64 @@
 <link rel="stylesheet" type='text/css' href="{% static 'css/step1_visualize.css' %}">
 {% endblock %}
 
+{% block task_title %}
+<div id='task_title_text' style='display:inline'>Crowd Work Result of Chronological Ordering</div>
+<div style='float: right'>
+  <button id='tuto_show' class='btn btn-secondary'>Tutorial</button>
+</div>
+{% endblock %}
+
+{% block task_description %}
+<div class='row'>
+  <div id="data_description" class='col-sm-6' style="overflow-y:scroll">
+  </div>
+  <div class='col-sm-6'>
+    <div style='display:block; margin-bottom:3px'>
+      <div class="dropdown" style="display:inline;">
+        <font size='3'>Relation task result:</font>
+        <button class='btn btn-secondary btn-sm dropdown-toggle' type="button" data-toggle='dropdown' id='linkage_dropdown'>
+        Chunk-Summary
+        </button>
+        <div class='dropdown-menu' aria-labelledby="dropdownMenu2">
+          <button id='chunk-summary' class='dropdown-item btn-sm' type='button'>Chunk-Summary</button>
+          <button id='paragraph-summary' class='dropdown-item btn-sm' type='button'>Paragraph-Summary</button>
+          <button id='no-link' class='dropdown-item btn-sm' type='button'>No visualization</button>
+        </div>
+      </div>
+    </div>
+    <div style='display:block; margin-bottom:3px'>
+      <font size='3'>Splitting task result:</font>
+      <div class="dropdown"  data-boundary='window' style="display:inline;">
+        <button class='btn btn-secondary btn-sm dropdown-toggle' type="button" data-boundary='window' data-toggle='dropdown' id='split_dropdown'>
+        Split Result
+        </button>
+        <div class='dropdown-menu' aria-labelledby="dropdownMenu2">
+          <button id='aggregated-chunks' class='dropdown-item btn-sm' type='button'>Aggregated Chunks</button>
+          <button id='split-result' class='dropdown-item btn-sm' type='button'>Split Result</button>
+          <button id='no-visualization' class='dropdown-item btn-sm' type='button'>No Visualization</button>
+        </div>
+      </div>
+    </div>
+    <div style='display:block'>
+      <font size='3'>Mouseover browsing:</font>
+      <div class="dropdown" data-boundary='viewport' style="display:inline;">
+        <button class='btn btn-secondary btn-sm dropdown-toggle' data-boundary='viewport' type="button" data-toggle='dropdown' id='mouseover_dropdown'>
+          Relation Data
+        </button>
+        <div class='dropdown-menu' aria-labelledby="dropdownMenu2">
+          <button id='relation-data' class='dropdown-item btn-sm' type='button'>Relation Data</button>
+          <button id='split-data' class='dropdown-item btn-sm' type='button'>Split Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$('.dropdown-toggle').dropdown()
+</script>
+{% endblock %}
+
 {% block summary %}
   {% for summary_sentence in summary_sentences %}
     <div class='col-sm-9 sum_sen' id='sum_sen_{{forloop.counter0}}'>
@@ -14,8 +72,12 @@
   {% endfor %}
 {% endblock %}
 
+{% block original_text_title %}
+<h6>Original text</h6>
+{% endblock %}
+
 {% block original_text %}
-<div class='chunk' id='chunk_0' style='background-color: #cfeee7'>
+<div class='chunk' id='chunk_0'>
   {% for paragraph in total_paragraphs%}
   <div id='paragraph_{{forloop.counter0}}'>
     <p class="paragraph">
@@ -25,15 +87,15 @@
     {% if splits|inlist:forloop.counter0 %}
     </div>
       {% if forloop.counter < total_paragraphs.count %}
-        {% if splits|find_index:forloop.counter0|divisibleby:2 %}
-          <div class='chunk' id='chunk_{{splits|find_index:forloop.counter0|add:1}}' style='background-color: #dfebfe'>
-        {% else %}
-          <div class='chunk' id='chunk_{{splits|find_index:forloop.counter0|add:1}}' style='background-color: #cfeee7'>
-        {% endif %}
+        <div class='chunk' id='chunk_{{splits|find_index:forloop.counter0|add:1}}' style='background-color: #ffffff'>
       {% endif %}
     {% endif %}
     {% if forloop.counter0 < paragraph_split.count %}
+      {% if splits|inlist:forloop.counter0 %}
+      <div id='paragraph_border__{{forloop.counter0}}' class='paragraph_border chunk_border' style='opacity:{{paragraph_split|weight:forloop.counter0}}'></div>
+      {% else %}
       <div id='paragraph_border__{{forloop.counter0}}' class='paragraph_border' style='opacity:{{paragraph_split|weight:forloop.counter0}}'></div>
+      {% endif %}
     {% endif %}
   {% endfor %}
   <script>
@@ -44,4 +106,7 @@
   <script type="text/javascript" src="{% static 'js/jsplumb.js' %}" /></script>
   <script type="text/javascript" src="{% static 'js/step1_visualize.js' %}" /></script>
 
+{% endblock %}
+
+{% block submit %}
 {% endblock %}

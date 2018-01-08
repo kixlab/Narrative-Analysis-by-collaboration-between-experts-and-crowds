@@ -31,6 +31,9 @@ var tutorialB = [
   'Also if you are lost in the text and want to find the target text again, hit SCROLL BACK.',
   'If you choose one, proceed with the proceed button.',
 ]
+var tutorialBkeyword = 'temporal leap'
+var tutorialBkeyword_explanation = 'A temporal leap happens when a story is flowing in reverse order or going back and forth between past and future events.'
+
 var tutorialC = [
   'Now you will do the same task of relating the part of original text to a summary sentence with the text B.',
 ]
@@ -100,15 +103,15 @@ show_modal = function(in_pre_impending, can_end_impending){
     }
   }else if(in_pre && !can_end){
     $("#modal_proceed").attr('type', 'button').text('Proceed')
-    $("#decision_text").text("You decided that the following sentence best expresses the content in text A.")
+    $("#decision_text").text("You decided that the below sentence best expresses the content in text A.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }else if(in_pre && can_end){
     $("#modal_proceed").attr('type', 'button').text('Proceed')
-    $("#decision_text").text("You decided that the following sentence best expresses the content in text B.")
+    $("#decision_text").text("You decided that the below sentence best expresses the content in text B.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }else if(!in_pre && can_end){
     $("#modal_proceed").attr('type', 'submit').text('Submit')
-    $("#decision_text").text("You decided that the following sentence best expresses the content in text A and B.")
+    $("#decision_text").text("You decided that the below sentence best expresses the content in text A and B.")
     $("#decision_text").append("<br><br><p><u>"+$("#"+cur_selected.toString()).text()+"</u></p>")
   }
   //initialize proceed button -disabled
@@ -171,7 +174,7 @@ show_modal = function(in_pre_impending, can_end_impending){
 }
 get_position_in_summary = function(){
   if(!tutoBdone && !can_end){
-    tutoBdone = Show_tuto(tutoBdone, tutorialB, 'Step1_B_')
+    tutoBdone = Show_tuto(tutoBdone, tutorialB, 'Step1_B_', tutorialBkeyword, tutorialBkeyword_explanation)
   }else if(!tutoCdone && can_end){
     tutoCdone = Show_tuto(tutoCdone, tutorialC, 'Step1_C_')
   }

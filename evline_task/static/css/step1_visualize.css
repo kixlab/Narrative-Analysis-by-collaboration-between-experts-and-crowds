@@ -1,12 +1,16 @@
 .paragraph_border{
-  width: 100%;
+  width: 99%;
   height: 5px;
   background-color: black;
+  margin-left: 1%;
+  border: solid 2px transparent;
 }
 
 .paragraph{
   margin-top: 8px;
   margin-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 .heading{
   z-index: 10;

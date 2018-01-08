@@ -31,7 +31,8 @@ def Step1_task_extractor(novel, time_limit=30):
     #remove deprecated tasks
     TaskMarker_Step1.objects.filter(novel=novel, Done=False, Start_Time__lte = datetime.datetime.now()-datetime.timedelta(minutes=time_limit)).delete()
     #find paragraphs # of works done
-    already_marked = TaskMarker_Step1.objects.filter(novel=novel).values('Task_Paragraph__paragraph_id').annotate(count = Count('Task_Paragraph')).order_by('count')
+    already_marked = TaskMarker_Step1.objects.filter(novel=novel).values('Task_Paragraph__paragraph_id').annotate(done_count = Sum(Case(When(Done=True, then=1), When(Done=False, then=0), output_field=IntegerField()))).annotate(count = Count('Task_Paragraph')).order_by('count')
+    print(already_marked)
     paragraphs = Paragraph.objects.filter(novel = novel)
     #find paragraphs without any work done
     unmarked = paragraphs.exclude(paragraph_id = paragraphs.count()-1).exclude(paragraph_id__in = [q['Task_Paragraph__paragraph_id'] for q in already_marked])
@@ -42,6 +43,10 @@ def Step1_task_extractor(novel, time_limit=30):
     #else
     else:
         #get the work that is least done
+        already_marked_not_done = already_marked.filter(done_count__lt=5)
+        if already_marked_not_done.count()>0:
+            return paragraphs.get(paragraph_id = already_marked_not_done[0]['Task_Paragraph__paragraph_id'])
+        print("all done")
         return paragraphs.get(paragraph_id = already_marked[0]['Task_Paragraph__paragraph_id'])
 
 def Pick_Step1_task(novel_id):
@@ -60,7 +65,7 @@ def Pick_Step1_task(novel_id):
     }
     return data
 
-def Step1_Visualize(novel_id, required_worker = 1):
+def Step1_Visualize(novel_id, required_worker = 5):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
     if Step1A_count == Paragraph.objects.filter(novel = novel).count()-1:
@@ -72,7 +77,7 @@ def Step1_Visualize(novel_id, required_worker = 1):
         splits=[]
         for one_split in paragraph_split:
             para_num = one_split['step1_task_a__refer_paragraph__paragraph_id']
-            if one_split['split_sum']>5:
+            if one_split['weight']>0.5:
                 if para_num not in splits:
                     splits.append(para_num)
         splits.append(paragraphs.count())
@@ -88,10 +93,11 @@ def Step1_Visualize(novel_id, required_worker = 1):
         for paragraph in total_paragraphs:
             taskb = Step1_Task_B.objects.filter(novel=novel, refer_paragraph = paragraph).values('sentence__summary_id').annotate(sentence_sum = Sum('confidence'), sen_count= Count('confidence')).order_by('-sentence_sum')
             relation_results_paragraph.append(list(taskb))
+            print(taskb)
         splits = list(splits)
         total_paragraphs = total_paragraphs.values('paragraph_string')
         summary_sentences = Summary_Sentence.objects.filter(novel=novel)
-
+        print(paragraph_split)
         data = {
             'total_paragraphs': total_paragraphs,
             'summary_sentences': summary_sentences,
@@ -104,7 +110,7 @@ def Step1_Visualize(novel_id, required_worker = 1):
     else:
         return False
 
-def Step1_Aggregate(novel_id, required_worker = 1):
+def Step1_Aggregate(novel_id, required_worker = 5):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
     #??? add 1B as safety measurement?
@@ -158,7 +164,7 @@ def Step2_Task_extractor(novel, time_limit=30):
     #remove deprecated tasks
     TaskMarker_Step2.objects.filter(novel=novel, Done=False, Start_Time__lte = datetime.datetime.now()-datetime.timedelta(minutes=time_limit)).delete()
     #find how many tasks are done being done
-    already_marked = TaskMarker_Step2.objects.filter(novel=novel).values('marked_task__pts_id').annotate(count = Count('marked_task')).order_by('count')
+    already_marked = TaskMarker_Step2.objects.filter(novel=novel).values('marked_task__pts_id').annotate(done_count = Sum(Case(When(Done=True, then=1), When(Done=False, then=0), output_field=IntegerField()))).annotate(count = Count('marked_task')).order_by('count')
     possible_tasks = Possible_Tasks_Step2.objects.filter(novel = novel)
     #find tasks that are not done at all
     unmarked = possible_tasks.exclude(pts_id__in = [q['marked_task__pts_id'] for q in already_marked])
@@ -169,6 +175,10 @@ def Step2_Task_extractor(novel, time_limit=30):
     #else
     else:
         #deploy a work for the task that has least work done
+        already_marked_not_done = already_marked.filter(done_count__lt=5)
+        if already_marked_not_done.count()>0:
+            return paragraphs.get(pts_id = already_marked_not_done[0]['marked_task__pts_id'])
+        print("all done")
         return possible_tasks.get(pts_id = already_marked[0]['marked_task__pts_id'])
 
 def Pick_Step2_task(novel_id):
