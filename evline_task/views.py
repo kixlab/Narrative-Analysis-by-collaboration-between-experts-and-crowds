@@ -9,7 +9,6 @@ import json
 # Create your views here.
 
 def step1(request, novel_id):
-    print(temporary_for_data_exploration())
     novel = Novel.objects.get(title = novel_id)
     if request.method=='POST':
         step1form = Step1Form(request.POST)
