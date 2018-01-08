@@ -43,7 +43,7 @@ def Step1_task_extractor(novel, time_limit=30):
     #else
     else:
         #get the work that is least done
-        already_marked_not_done = already_marked.filter(done_count__lt=5)
+        already_marked_not_done = already_marked.filter(done_count__lt=3)
         if already_marked_not_done.count()>0:
             return paragraphs.get(paragraph_id = already_marked_not_done[0]['Task_Paragraph__paragraph_id'])
         print("all done")
@@ -65,7 +65,7 @@ def Pick_Step1_task(novel_id):
     }
     return data
 
-def Step1_Visualize(novel_id, required_worker = 5):
+def Step1_Visualize(novel_id, required_worker = 3):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
     if Step1A_count == Paragraph.objects.filter(novel = novel).count()-1:
@@ -110,7 +110,7 @@ def Step1_Visualize(novel_id, required_worker = 5):
     else:
         return False
 
-def Step1_Aggregate(novel_id, required_worker = 5):
+def Step1_Aggregate(novel_id, required_worker = 3):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
     #??? add 1B as safety measurement?
@@ -175,7 +175,7 @@ def Step2_Task_extractor(novel, time_limit=30):
     #else
     else:
         #deploy a work for the task that has least work done
-        already_marked_not_done = already_marked.filter(done_count__lt=5)
+        already_marked_not_done = already_marked.filter(done_count__lt=3)
         if already_marked_not_done.count()>0:
             return paragraphs.get(pts_id = already_marked_not_done[0]['marked_task__pts_id'])
         print("all done")
