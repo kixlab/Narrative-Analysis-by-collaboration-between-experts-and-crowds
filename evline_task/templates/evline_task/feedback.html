@@ -23,46 +23,46 @@
       <p>How understandable was the summary?</p>
       <ul class='likert'>
         <li>
-          <input type="radio" name="understandability" value="1">
+          <input type="radio" name="understandability" onclick="check_input_for_submit()" value="1">
           <label>Extremely Confusing</label>
         </li>
         <li>
-          <input type="radio" name="understandability" value="2">
+          <input type="radio" name="understandability" onclick="check_input_for_submit()" value="2">
           <label>Confusing</label>
         </li>
         <li>
-          <input type="radio" name="understandability" value="3">
+          <input type="radio" name="understandability" onclick="check_input_for_submit()" value="3">
           <label>Neutral</label>
         </li>
         <li>
-          <input type="radio" name="understandability" value="4">
+          <input type="radio" name="understandability" onclick="check_input_for_submit()" value="4">
           <label>Understandable</label>
         </li>
         <li>
-          <input type="radio" name="understandability" value="5">
+          <input type="radio" name="understandability" onclick="check_input_for_submit()" value="5">
           <label>Very Understandable</label>
         </li>
       </ul>
       <p>Was the summary helpful when doing tasks?</p>
       <ul class='likert'>
         <li>
-          <input type="radio" name="helpfulness" value="1">
+          <input type="radio" name="helpfulness" onclick="check_input_for_submit()" value="1">
           <label>Extremely Not Helpful</label>
         </li>
         <li>
-          <input type="radio" name="helpfulness" value="2">
+          <input type="radio" name="helpfulness" onclick="check_input_for_submit()" value="2">
           <label>Not Helpful</label>
         </li>
         <li>
-          <input type="radio" name="helpfulness" value="3">
+          <input type="radio" name="helpfulness" onclick="check_input_for_submit()" value="3">
           <label>Neutral</label>
         </li>
         <li>
-          <input type="radio" name="helpfulness" value="4">
+          <input type="radio" name="helpfulness" onclick="check_input_for_submit()" value="4">
           <label>Helpful</label>
         </li>
         <li>
-          <input type="radio" name="helpfulness" value="5">
+          <input type="radio" name="helpfulness" onclick="check_input_for_submit()" value="5">
           <label>Strongly Helpful</label>
         </li>
       </ul>
@@ -70,9 +70,21 @@
       Can you tell us what was difficult, and what can be improved?
       </p>
       <ul>
-      <textarea style="width: 100%; height: 50%" name='step1feedback'></textarea>
+      <textarea id='step1feedback' style="width: 100%; height: 50%" name='step1feedback' onkeyup="check_input_for_submit()"></textarea>
       </ul>
-      <button class='btn btn-success' type='submit'>Submit feedback</button>
+      <button id="form_submit_btn" class='btn btn-success' type='submit' disabled>Submit feedback</button>
+    <script>
+      function check_input_for_submit(){
+        if($("#step1feedback").val() && $("input[name='helpfulness']:checked").val() && $("input[name='understandability']:checked").val()){
+          $("#form_submit_btn").prop("disabled", false)
+        }else{
+          $("#form_submit_btn").prop("disabled", true)
+        }
+        console.log($("#step1feedback").val())
+        console.log($("input[name='helpfulness']:checked").val())
+        console.log($("input[name='understandability']:checked").val())
+      }
+    </script>
     </form>
     </div>
   </body>
