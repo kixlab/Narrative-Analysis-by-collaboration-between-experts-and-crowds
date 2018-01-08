@@ -17,6 +17,7 @@
       </div>
     </nav>
     <div class='container'>
+      <p>DO NOT GO BACK OR RELOAD. YOU WILL RECEIVE THE TOKEN AFTER YOU FINISH THIS FORM</p>
     <form method="POST">
       {% csrf_token %}
       <input type='text' style='display:none' name='Turker_id' value='{{Turker_id}}'></input>
@@ -86,6 +87,7 @@
       }
     </script>
     </form>
+
     </div>
   </body>
 </html>
