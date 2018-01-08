@@ -20,6 +20,8 @@ class Step1Form(forms.Form):
 class Feedback1Form(forms.Form):
     Turker_id = forms.CharField()
     step1feedback = forms.CharField()
+    understandability = forms.CharField()
+    helpfulness = forms.CharField()
 
 class Step2Form(forms.Form):
     Turker_id = forms.CharField()

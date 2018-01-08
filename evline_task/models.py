@@ -77,12 +77,16 @@ class Step2_Task(models.Model):
 class Feedback_Step1(models.Model):
     feedback = models.TextField(default="")
     Turker_id= models.TextField(default="")
+    Helpfulness = models.IntegerField(default = 0)
+    Understandability =models.IntegerField(default = 0)
     def __str__(self):
         return self.Turker_id
 
 class Feedback_Step2(models.Model):
     feedback = models.TextField(default="")
     Turker_id= models.TextField(default="")
+    Helpfulness = models.IntegerField(default = 0)
+    Understandability =models.IntegerField(default = 0)
     def __str__(self):
         return self.Turker_id
 

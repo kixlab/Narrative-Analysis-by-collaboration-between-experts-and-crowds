@@ -13,17 +13,65 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#eeeeee">
       <div class="navbar-brand">
-        Can you explain what made this task difficult?
+        Can you explain your work experience?
       </div>
     </nav>
     <div class='container'>
-      <p>
-      Can you tell us what was difficult, and what can be improved?
-    </p>
     <form method="POST">
       {% csrf_token %}
       <input type='text' style='display:none' name='Turker_id' value='{{Turker_id}}'></input>
+      <p>How understandable was the summary?</p>
+      <ul class='likert'>
+        <li>
+          <input type="radio" name="understandability" value="1">
+          <label>Extremely Confusing</label>
+        </li>
+        <li>
+          <input type="radio" name="understandability" value="2">
+          <label>Confusing</label>
+        </li>
+        <li>
+          <input type="radio" name="understandability" value="3">
+          <label>Neutral</label>
+        </li>
+        <li>
+          <input type="radio" name="understandability" value="4">
+          <label>Understandable</label>
+        </li>
+        <li>
+          <input type="radio" name="understandability" value="5">
+          <label>Very Understandable</label>
+        </li>
+      </ul>
+      <p>Was the summary helpful when doing tasks?</p>
+      <ul class='likert'>
+        <li>
+          <input type="radio" name="helpfulness" value="1">
+          <label>Extremely Not Helpful</label>
+        </li>
+        <li>
+          <input type="radio" name="helpfulness" value="2">
+          <label>Not Helpful</label>
+        </li>
+        <li>
+          <input type="radio" name="helpfulness" value="3">
+          <label>Neutral</label>
+        </li>
+        <li>
+          <input type="radio" name="helpfulness" value="4">
+          <label>Helpful</label>
+        </li>
+        <li>
+          <input type="radio" name="helpfulness" value="5">
+          <label>Strongly Helpful</label>
+        </li>
+      </ul>
+      <p>
+      Can you tell us what was difficult, and what can be improved?
+      </p>
+      <ul>
       <textarea style="width: 100%; height: 50%" name='step1feedback'></textarea>
+      </ul>
       <button class='btn btn-success' type='submit'>Submit feedback</button>
     </form>
     </div>

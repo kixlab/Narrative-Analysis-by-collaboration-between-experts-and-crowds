@@ -122,9 +122,12 @@ def feedback_step1(request):
     if request.method=="POST":
         feedback1form = Feedback1Form(request.POST)
         if feedback1form.is_valid():
+            print(feedback1form)
             Turker_id = feedback1form.cleaned_data['Turker_id']
             feedback = feedback1form.cleaned_data['step1feedback']
-            feedbackmodel = Feedback_Step1(feedback = feedback, Turker_id = Turker_id)
+            helpfulness = int(feedback1form.cleaned_data['helpfulness'])
+            understandability = int(feedback1form.cleaned_data['understandability'])
+            feedbackmodel = Feedback_Step1(feedback = feedback, Turker_id = Turker_id, Helpfulness = helpfulness, Understandability = understandability)
             feedbackmodel.save()
             return HttpResponseRedirect('/evline_task/end/'+Turker_id)
     storage = get_messages(request)
@@ -140,7 +143,9 @@ def feedback_step2(request):
         if feedback1form.is_valid():
             Turker_id = feedback1form.cleaned_data['Turker_id']
             feedback = feedback1form.cleaned_data['step1feedback']
-            feedbackmodel = Feedback_Step2(feedback = feedback, Turker_id = Turker_id)
+            helpfulness = int(feedback1form.cleaned_data['helpfulness'])
+            understandability = int(feedback1form.cleaned_data['understandability'])
+            feedbackmodel = Feedback_Step2(feedback = feedback, Turker_id = Turker_id, Helpfulness = helpfulness, Understandability = understandability)
             feedbackmodel.save()
             return HttpResponseRedirect('/evline_task/end/'+Turker_id)
     storage = get_messages(request)
