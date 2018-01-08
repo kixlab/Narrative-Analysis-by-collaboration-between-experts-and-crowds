@@ -24,12 +24,12 @@ var tutorialB = [
   'In this HIT, you will do three subtasks that contribute to ordering events of a novel in chronological order.',
   'First two tasks will be about relating the event that contains a paragraph with a sentence of a summary.',
   'The last task will be about deciding whether a temporal leap exists in between two paragraphs.',
-  'First you will read the summary and grasp the overall story line of the novel.',
-  'Then you will read a part of the novel,',
-  'and choose which sentence of the summary best describes the text A, by directly clicking a sentence.',
-  'If you cannot understand the context, you can expand the text and learn more about the novel.',
+  'For the first two tasks, you will read the summary and grasp the overall story line of the novel.',
+  'Then you will read a part of the novel, grasping the local context of the novel.',
+  'Then you will choose which sentence of the summary best describes the text A, by directly clicking a sentence.',
+  'If you cannot understand the local context from the paragraph and given surrounding texts, you can expand the text and learn more about the novel.',
   'Also if you are lost in the text and want to find the target text again, hit SCROLL BACK.',
-  'If you choose one, proceed with the proceed button.',
+  'If you choose one sentence, proceed with the proceed button.',
 ]
 
 var tutorialC = [
