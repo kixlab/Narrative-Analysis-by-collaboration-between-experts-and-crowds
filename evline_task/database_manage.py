@@ -77,7 +77,7 @@ def Step1_Visualize(novel_id, required_worker = 2):
         splits=[]
         for one_split in paragraph_split:
             para_num = one_split['step1_task_a__refer_paragraph__paragraph_id']
-            if one_split['weight']>=0.7:
+            if one_split['weight']>=0.6:
                 if para_num not in splits:
                     splits.append(para_num)
         splits.append(paragraphs.count())
