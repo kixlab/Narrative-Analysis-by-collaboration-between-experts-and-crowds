@@ -65,7 +65,7 @@ def Pick_Step1_task(novel_id):
     }
     return data
 
-def Step1_Visualize(novel_id, required_worker = 3):
+def Step1_Visualize(novel_id, required_worker = 2):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
     if Step1A_count == Paragraph.objects.filter(novel = novel).count()-1:
