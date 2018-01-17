@@ -1,10 +1,17 @@
-from .models import Novel, Paragraph, Summary_Sentence, Step1_Task_A, Step1_Task_B, TaskMarker_Step1, Chunk, Possible_Tasks_Step2, TaskMarker_Step2
+from .models import *
 from nltk.tokenize import sent_tokenize
 import datetime
 from django.db.models import Count, Sum, When, Q, F, Case, IntegerField, FloatField
 from django.db.models.functions import Cast
 import random
 import string
+
+#maximum minute that workers can work
+TIME_LIMIT = 30
+#half the number of paragraphs shown for each workers in the step 1
+HALF_PER_WORKER = 3
+
+
 def Novel_Data_Gen(novel_id):
     #get novel objects
     novel = Novel.objects.get(title = novel_id)
@@ -29,13 +36,14 @@ def Novel_Data_Gen(novel_id):
 
 def Step1_task_extractor(novel, time_limit=30):
     #remove deprecated tasks
-    TaskMarker_Step1.objects.filter(novel=novel, Done=False, Start_Time__lte = datetime.datetime.now()-datetime.timedelta(minutes=time_limit)).delete()
+    TaskMarker_Step1_split_find.objects.filter(novel=novel, Done=False, Start_Time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TIME_LIMIT)).delete()
     #find paragraphs # of works done
-    already_marked = TaskMarker_Step1.objects.filter(novel=novel).values('Task_Paragraph__paragraph_id').annotate(done_count = Sum(Case(When(Done=True, then=1), When(Done=False, then=0), output_field=IntegerField()))).annotate(count = Count('Task_Paragraph')).order_by('count')
+    already_marked = TaskMarker_Step1_split_find.objects.filter(novel=novel).values('Task_Paragraph__paragraph_id').annotate(done_count = Sum(Case(When(Done=True, then=1), When(Done=False, then=0), output_field=IntegerField()))).annotate(count = Count('Task_Paragraph')).order_by('count')
     print(already_marked)
     paragraphs = Paragraph.objects.filter(novel = novel)
     #find paragraphs without any work done
-    unmarked = paragraphs.exclude(paragraph_id = paragraphs.count()-1).exclude(paragraph_id__in = [q['Task_Paragraph__paragraph_id'] for q in already_marked])
+    unmarked = paragraphs.annotate(idmod = F('paragraph_id') % HALF_PER_WORKER).filter(idmod = 0)
+    unmarked = unmarked.exclude(paragraph_id = (unmarked.count()-1)*3).exclude(paragraph_id__in = [q['Task_Paragraph__paragraph_id'] for q in already_marked])
     #if any work do not have a mark
     if unmarked.count() >0 :
         #deploy task on it
@@ -49,7 +57,7 @@ def Step1_task_extractor(novel, time_limit=30):
         print("all done")
         return paragraphs.get(paragraph_id = already_marked[0]['Task_Paragraph__paragraph_id'])
 
-def Pick_Step1_task(novel_id):
+def Pick_Step1_split_find_task(novel_id):
     #get novel objects
     novel = Novel.objects.get(title=novel_id)
     #pick one *work*
@@ -57,14 +65,14 @@ def Pick_Step1_task(novel_id):
     print(paragraph)
     #generate Task id, and mark the task
     Task_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    taskmarker = TaskMarker_Step1(novel=novel, Task_id = Task_id, Done=False, Start_Time = datetime.datetime.now(), Task_Paragraph=paragraph)
+    taskmarker = TaskMarker_Step1_split_find(novel=novel, Task_id = Task_id, Done=False, Start_Time = datetime.datetime.now(), Task_Paragraph=paragraph)
     taskmarker.save()
     data ={
         'Task_id' : Task_id,
         'paragraph_id' : paragraph.paragraph_id
     }
     return data
-
+"""
 def Step1_Visualize(novel_id, required_worker = 2):
     novel = Novel.objects.get(title=novel_id)
     Step1A_count = Step1_Task_A.objects.filter(novel= novel).values('refer_paragraph__paragraph_id').annotate(count = Count('refer_paragraph')).filter(count__gte=required_worker).count()
@@ -159,7 +167,7 @@ def Step1_Aggregate(novel_id, required_worker = 3):
         return True
     else:
         return False
-
+"""
 def Step2_Task_extractor(novel, time_limit=30):
     #remove deprecated tasks
     TaskMarker_Step2.objects.filter(novel=novel, Done=False, Start_Time__lte = datetime.datetime.now()-datetime.timedelta(minutes=time_limit)).delete()

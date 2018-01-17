@@ -20,10 +20,10 @@ body{
   width: 100%;
 }
 .prompt_box{
-  height: 18%;
+  height: 10%;
 }
 .two_boxes{
-  height: 72%;
+  height: 80%;
   margin-bottom: 0.5%;
 }
 .summary_box{
@@ -41,7 +41,7 @@ body{
   margin: 0;
   height: 39px;
   padding-top: 10px;
-
+  z-index: 1;
   background-color: white;
 }
 .contents{

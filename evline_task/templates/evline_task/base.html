@@ -19,7 +19,7 @@
         {% endblock %}
       </div>
     </nav>
-    <div class='main_box container'>
+    <div class='main_box container-fluid'>
       <div class="prompt_box row">
         <div class='prompt col-sm-12'>
           {% block task_description %}
@@ -51,54 +51,7 @@
         {% endblock %}
       </div>
     </div>
-      <div class="modal fade" id="confidence_modal" tabindex="-1" role="dialog" aria-labelledby="confidence_modalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="confidence_modalLabel">Rate your confidence about the decision</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p id='decision_text'></p>
-              <p>How are you confident about your decision?
-                The level of confidence does not affect the acceptance of your submission.</p>
-                <ul class='likert'>
-                  <li>
-                    <input type="radio" name="likert" value="1">
-                    <label>Extremely Uncertain</label>
-                  </li>
-                  <li>
-                    <input type="radio" name="likert" value="2">
-                    <label>Uncertain</label>
-                  </li>
-                  <li>
-                    <input type="radio" name="likert" value="3">
-                    <label>Neutral</label>
-                  </li>
-                  <li>
-                    <input type="radio" name="likert" value="4">
-                    <label>Confident</label>
-                  </li>
-                  <li>
-                    <input type="radio" name="likert" value="5">
-                    <label>Strongly Confident</label>
-                  </li>
-                </ul>
-              </div>
-              <div class="modal-footer">
-                <form method="post">{% csrf_token %}
-                <input type='string' style='display:none' name='Turker_id' id='turker_id_input'>
-                {% block data_input_form %}
-                {% endblock %}
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="modal_proceed" type="button" class="btn btn-success">Proceed</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+
         <div class="modal fade" id="tutorial_modal" tabindex="-1" role="dialog" aria-labelledby="confidence_modalLabel" aria-hidden="true">
           <div class="fullscreen-modal modal-dialog modal-lg" role="document">
             <div class="modal-content">

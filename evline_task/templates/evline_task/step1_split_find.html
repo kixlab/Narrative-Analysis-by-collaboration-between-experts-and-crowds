@@ -1,0 +1,151 @@
+{% extends 'evline_task/base.html' %}
+{% load evline_extras %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" type='text/css' href="{% static 'css/step1.css' %}">
+{% endblock %}
+
+<!--title-->
+{% block task_title %}
+<div id="task_title_text" style="display:inline">Which sentence of the summary is explaining the event that includes part A of the original text?</div>
+<button id='tuto_show' class='btn btn-secondary' style='float: right'>Tutorial</button>
+{% endblock %}
+
+<!--summary-->
+{% block summary %}
+  {% for summary_sentence in summary_sentences %}
+    <a id={{summary_sentence.summary_id}} class="sum_sen disabled" href="#">{{summary_sentence.sentence_string}}</a>
+  {% endfor %}
+
+  <div style='position: fixed; display:none' id="local_text_summarization" tabindex="-1" role="dialog" aria-labelledby="local_text_sum_modal" aria-hidden="true" data-backdrop='false'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="local_text_sum_modal">Write a summary of the text in red box.</h6>
+        <button id="summary_hide_button" class='btn btn-sm btn-secondary' style='display: none'>Hide pop up</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="local_text_summary" style="height: 100px"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+<!--original text's title button-->
+{%block original_text_title%}
+<div id='original_text_title' style='display:none'>
+  <h6 style="display: inline">Parts of the original text</h6>
+</div>
+<div id='global_quiz_title'>
+  <h6 style="display: inline">Quiz for checking your understanding</h6>
+</div>
+{%endblock%}
+
+<!--original text-->
+{% block original_text %}
+<div id='original_text_content' style='display:none;'>
+<button id='see_previous' class='btn btn-info' style="width:100%; margin-bottom:10px">See the previous part</button>
+<div id="text_content">
+  <div id='original_text_subject_content' style="border: solid 2.5px transparent; padding: 5px;">
+  {% for paragraph in paragraphs %}
+    <p id="paragraph_{{paragraph.paragraph_id}}" style='margin-bottom: 0px'>{{paragraph.paragraph_string}}</p>
+    {% if forloop.counter0 < paragraphs.count %}
+      {% if forloop.counter != paragraphs.count %}
+        <button id='paragraph_border_{{paragraph.paragraph_id}}' class='border-click btn btn-outline-secondary btn-sm col-sm-12' style='visibility:hidden' data-toggle='tooltip' data-container='body' data-html='true' data-trigger='manual'
+        data-placement='right'
+        title="<p>What is your reasoning behind selecting this border as a time leap?</p>
+        <textarea id='reasoning_{{paragraph.paragraph_id}}' style='width: 100%'></textarea>
+        <p>How much are you sure that a temporal leap occurs here?</p>
+        <ul class='likert'>
+          <li>
+            <input type='radio' name='split_{{paragraph.paragraph_id}}' value='1'>
+            <label>Extremely Uncertain</label>
+          </li>
+          <li>
+            <input type='radio' name='split_{{paragraph.paragraph_id}}' value='2'>
+            <label>Uncertain</label>
+          </li>
+          <li>
+            <input type='radio' name='split_{{paragraph.paragraph_id}}' value='3'>
+            <label>Neutral</label>
+          </li>
+          <li>
+            <input type='radio' name='split_{{paragraph.paragraph_id}}' value='4'>
+            <label>Confident</label>
+          </li>
+          <li>
+            <input type='radio' name='split_{{paragraph.paragraph_id}}' value='5'>
+            <label>Strongly Confident</label>
+          </li>
+        </ul>
+        <button id='paragraph_border_{{paragraph.paragraph_id}}_return' class='btn btn-sm btn-outline-success split-return-button' onclick='add_border_result({{paragraph.paragraph_id}})' style='display:block'>Return</button>"
+        >Click if time leap occurs at here.</button>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  </div>
+</div>
+<button id='see_next' class='btn btn-info' style="width:100%; margin-bottom:10px">See the next part</button>
+</div>
+
+<div id='global_quiz_content'>
+  <p>{{quiz_question}}</p>
+    <ul>
+      {% for quiz_option in quiz_options %}
+      <li>
+        <input type="radio" name="global_quiz_option" value="{{quiz_option}}">
+        <label>{{quiz_option}}</label>
+      </li>
+      {% endfor %}
+    </ul>
+</div>
+
+<script>
+  var refer_paragraph_id = {{refer_paragraph_id}}
+  var total_paragraphs ={{total_paragraphs|safe}}
+  var beginning_id = {{beginning_id}}
+  var ending_id ={{ending_id}}
+  var Task_id='{{Task_id}}'
+  console.log(total_paragraphs)
+  var half_subject_paragraph_len = {{HALF_PER_WORKER}}
+  for(var i = beginning_id-3; i<beginning_id; i++){
+    $("#original_text_subject_content").before("<p style='color:grey'>"+total_paragraphs[i]['paragraph_string']+"</p>")
+  }
+  for(var i = ending_id; i>ending_id-3; i--){
+    if(i>refer_paragraph_id+2*half_subject_paragraph_len-1){
+      console.log(i)
+        $("#original_text_subject_content").after("<p style='color:grey'>"+total_paragraphs[i]['paragraph_string']+"</p>")
+    }
+  }
+</script>
+{% endblock %}
+<!--for submission buttons-->
+{% block submit %}
+
+<div style="float:right; display:inline">
+<button id='only_prev' class='btn btn-secondary btn-sm' style='display:none'>Previous step</button>
+
+<form method='post'>{% csrf_token %}
+  <input id='turker_id_input' type='string' name='Turker_id' style='display:none'>
+  <input id='task_id_input' type='string' name='Task_id' style='display:none'>
+  <input type='string' name='summary' style='display:none'>
+  <input type='string' name='border_input' style='display:none'>
+  <input type='string' name='non_border_input' style='display:none'>
+  <input type='string' name='quiz' style='display:none'>
+  <input type='number' name='beginning_id' style='display:none'>
+  <input type='number' name='ending_id' style='display:none'>
+  <input type='number' name='refer_paragraph_id' style='display:none'>
+  <input type='string' name='summary' style='display:none'>
+  <button id='prev' type='button' class='btn btn-secondary btn-sm' style='display:none'>Previous</button>
+  <button id='proc' name='proc' type='button' value='nosubmit' class='btn btn-success btn-sm'>Proceed</button>
+
+</form>
+</div>
+<script type="text/javascript" src="{% static 'js/step1_split_find.js' %}" /></script>
+<script>$('[data-toggle="tooltip"]').tooltip("show").tooltip({
+  container: "#original_text"
+})</script>
+{% endblock %}

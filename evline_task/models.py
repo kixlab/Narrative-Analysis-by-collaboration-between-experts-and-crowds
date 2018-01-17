@@ -6,6 +6,9 @@ from django.db import models
 class Novel(models.Model):
     original_text = models.TextField(default = "")
     summary = models.TextField(default = "")
+    quiz_question = models.TextField(default ='')
+    quiz_options = models.TextField(default = '')
+    quiz_answer = models.TextField(default = '')
     title = models.TextField(default = "")
     def __str__(self):
         return self.title
@@ -37,26 +40,36 @@ class Chunk(models.Model):
         return self.novel.title+"_Chunk_"+ str(self.chunk_id)
 
 #result of task, Step1A
-    #task of seeing whether the paragraph this object is referring to and the next paragraph are
-    #temporally detached
-class Step1_Task_A(models.Model):
+    #task of finding time separation in between paragraphs
+class Step1_Split(models.Model):
     Turker_id = models.CharField(default="", max_length=30)
-    is_separate = models.BooleanField(default = False)
     refer_paragraph = models.ForeignKey(Paragraph)
     confidence = models.IntegerField(default = 0)
+    reasoning = models.TextField(default="")
     novel = models.ForeignKey(Novel)
     context_begin_paragraph = models.IntegerField(default = -1)
     context_end_paragraph = models.IntegerField(default = -1)
     def __str__(self):
         return self.novel.title+"_step1A_on_"+str(self.refer_paragraph.paragraph_id)
 
-#result of task, Step1B
-    #task of seeing in which summary sentence the paragraph is being explained
-class Step1_Task_B(models.Model):
+#when a worker told that there is no split in the subject text they see
+class Step1_No_Split(models.Model):
     Turker_id = models.CharField(default="", max_length=30)
-    sentence = models.ForeignKey(Summary_Sentence)
     refer_paragraph = models.ForeignKey(Paragraph)
-    confidence = models.IntegerField(default = 0)
+    reasoning = models.TextField(default="")
+    novel = models.ForeignKey(Novel)
+    context_begin_paragraph = models.IntegerField(default = -1)
+    context_end_paragraph = models.IntegerField(default = -1)
+    def __str__(self):
+        return self.novel.title+"_step1A_on_"+str(self.refer_paragraph.paragraph_id)
+
+
+#result of task, Step1B
+    #task of summarizing the seen text parts
+class Step1_Summary(models.Model):
+    Turker_id = models.CharField(default="", max_length=30)
+    summary = models.TextField(default="")
+    refer_paragraph = models.ForeignKey(Paragraph)
     novel = models.ForeignKey(Novel)
     context_begin_paragraph = models.IntegerField(default = -1)
     context_end_paragraph = models.IntegerField(default = -1)
@@ -90,7 +103,7 @@ class Feedback_Step2(models.Model):
     def __str__(self):
         return self.Turker_id
 
-class TaskMarker_Step1(models.Model):
+class TaskMarker_Step1_split_find(models.Model):
     novel = models.ForeignKey(Novel)
     Turker_id = models.CharField(default = "", max_length = 30)
     Task_id = models.CharField(default = "", max_length = 30)

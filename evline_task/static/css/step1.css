@@ -3,3 +3,10 @@
   border-left: 1px solid black;
   overflow-y: scroll;
 }
+.border-click{
+  text-align: left !important;
+  border: 1px solid black;
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  font-size: 0.7rem !important;
+}
